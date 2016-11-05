@@ -27,7 +27,7 @@ namespace Client
         NetworkStream networkStream = null;
         System.Threading.Thread ctThread = null;
         string Message = null;
-        int stage = 0;
+        ApplicationStage stage = ApplicationStage.Request;
 
         public void GetMessage()
         {
@@ -44,6 +44,14 @@ namespace Client
 
                     JObject jsonObj = JObject.Parse(Message);
 
+                    if(stage == ApplicationStage.Request)
+                    {
+                        // 1. Sprawdz klucze
+                        // 2. Wygeneruj A
+                        // 3. Wyslij A do serwera
+                        // 4. Zmien stage na 
+                    }
+
                     //Message = Base64.Decode("QWxhIG1hIGtvdGEsIGEga290IG1hIEFsZS4=");
 
                     // We have received message
@@ -51,6 +59,10 @@ namespace Client
                     // 2. Check if we are authorized
                     //      - if so, we expect message
                     //      - otherwise, keys etc.
+
+                    DiffieHellman DH = new DiffieHellman(23, 5);
+
+                    Message = "p:" + DH.p + ", g: " + DH.g + ", b: " + DH.b + ", B: " + DH.B;
 
                     displayMessage();
 
