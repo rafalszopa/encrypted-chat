@@ -13,8 +13,8 @@ console.log("Encrypted Chat Server v. 1.0".green);
 function Broadcast(sender, message) {
   if(clients.length > 0) {
     for(var i = 0; i < clients.length; i++) {
-      if(clients[i] !== sender) {
-        clients[i].write(message);
+      if(clients[i].soc !== sender && clients[i].isKeyExchanged == true) {
+        clients[i].soc.write(message);
       }
     }
   }
@@ -39,14 +39,24 @@ function StartServer() {
     var clientAddress = socket.remoteAddress + ":" + socket.remotePort;
     console.log("New user connected: %s".green, clientAddress);
 
-    // Authenticate client. If OK add client to array.
-    // Else: reject connection.
 
+    var client = {
+      name: "Mariusz",
+      soc: socket,
+      encryption: "none",
+      isKeyExchanged: false,
+      p: dh.generatePrime(),
+      g: dh.generatePrimitiveRoot(),
+      a: dh.generateSecretNumber(),
+      A: dh.computeA(socket.g, socket.a, socket.p),
+      B: null
+    };
 
-    clients.push(socket);
+    clients.push(client);
 
     socket.on('data', function(data) {
 
+      var client = findClientBySocket(socket);
       // If received data are not in JSON format
       // Log the error and destroy socket
       try {
@@ -58,10 +68,11 @@ function StartServer() {
         return;
       }
 
-      // If there is request
+      // If there is a request
       if(jsonData.hasOwnProperty("request") && Object.keys(jsonData).length == 1) {
         if(jsonData["request"] === "keys") {
-          ob = dh.generatePrimeAndPrimitiveRoot();
+
+          ob = {"p" : client.p, "g": client.g};
           socket.write(JSON.stringify(ob));
         }
 
@@ -82,6 +93,7 @@ function StartServer() {
 
 
       console.log("[%s]: %s".yellow, clientAddress, data);
+      console.log(client.name, client.encryption, client.a);
       Broadcast(socket, data);
 
       //var jsonData = JSON.parse(data);
@@ -120,5 +132,13 @@ function StartServer() {
 
 }
 
+function findClientBySocket(socket) {
+  for(var i = 0; i < clients.length; i++) {
+    if(clients[i].soc === socket) {
+      return clients[i];
+    }
+  }
+  return null;
+}
 
 StartServer();

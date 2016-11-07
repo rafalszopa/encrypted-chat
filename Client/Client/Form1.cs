@@ -27,7 +27,8 @@ namespace Client
         NetworkStream networkStream = null;
         System.Threading.Thread ctThread = null;
         string Message = null;
-        ApplicationStage stage = ApplicationStage.Request;
+        bool isKeyExchanged = false;
+        DiffieHellman dh = null;
 
         public void GetMessage()
         {
@@ -35,7 +36,6 @@ namespace Client
             {
                 try
                 {
-                    //int buffSize = 0;
                     int buffSize = Client.ReceiveBufferSize;
                     byte[] inStream = new byte[buffSize];
 
@@ -44,27 +44,46 @@ namespace Client
 
                     JObject jsonObj = JObject.Parse(Message);
 
-                    if(stage == ApplicationStage.Request)
+                    if(!isKeyExchanged)
                     {
+                        if (jsonObj["p"] != null && jsonObj["g"] != null && jsonObj.Count == 2)
+                        {
+                            // Message = "Keys: " + "p: " + jsonObj["p"] + ", g: " + jsonObj["g"];
+                            displayMessage();
+                        }
+                        else if (jsonObj["b"] != null && jsonObj.Count == 1)
+                        {
+
+                        }
+                    }
+                    else if (jsonObj["msg"] != null && jsonObj["from"] != null && jsonObj.Count == 2)
+                    {
+                        //
+                    }
+                    else
+                    {
+                        // Json object is incorrect!
+                        Message = "Do dupy na raki!";
+                        displayMessage();
+                    }
+                        
+
                         // 1. Sprawdz klucze
                         // 2. Wygeneruj A
                         // 3. Wyslij A do serwera
                         // 4. Zmien stage na 
-                    }
 
-                    //Message = Base64.Decode("QWxhIG1hIGtvdGEsIGEga290IG1hIEFsZS4=");
+                        // We have received message
+                        // 1. Check if json
+                        // 2. Check if we are authorized
+                        //      - if so, we expect message
+                        //      - otherwise, keys etc.
 
-                    // We have received message
-                    // 1. Check if json
-                    // 2. Check if we are authorized
-                    //      - if so, we expect message
-                    //      - otherwise, keys etc.
+                        //DiffieHellman DH = new DiffieHellman(23, 5);
 
-                    DiffieHellman DH = new DiffieHellman(23, 5);
+                    //Message = "p:" + DH.p + ", g: " + DH.g + ", b: " + DH.b + ", B: " + DH.B;
 
-                    Message = "p:" + DH.p + ", g: " + DH.g + ", b: " + DH.b + ", B: " + DH.B;
-
-                    displayMessage();
+                    //displayMessage();
 
                 } catch (Exception Ex)
                 {
