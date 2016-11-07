@@ -13,22 +13,29 @@ namespace Client
         public BigInteger g { get; set; }
         public BigInteger b { get; set; }
         public BigInteger A { get; set; }
-        public BigInteger B { get; set; }
-        public BigInteger test { get; set; }
-        public DiffieHellman(int p, int g)
+        public BigInteger B;
+        public void SetB(BigInteger B)
+        {
+            this.B = B;
+            this.Key = computeKey();
+        }
+        public BigInteger Key { get; set; }
+        public DiffieHellman(BigInteger p, BigInteger g)
         {
             this.p = p;
             this.g = g;
-            this.b = generateRandomNumber();
-            this.B = BigInteger.ModPow(this.g, this.b, this.p);
+            Random rnd = new Random();
+            this.b = rnd.Next(1000, Int32.MaxValue);
+            this.A = BigInteger.ModPow(this.g, this.b, this.p);
         }
-        public BigInteger generateRandomNumber()
+        public BigInteger computeKey()
         {
-            return 15;
+            return BigInteger.ModPow(this.B, this.b, this.p);
         }
         public BigInteger generateSecret()
         {
             return 15;
         }
+
     }
 }

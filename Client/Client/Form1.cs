@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Numerics;
 
 //  TO DO:
 //  - Disable Send button, when the textBox is empty
@@ -48,12 +49,34 @@ namespace Client
                     {
                         if (jsonObj["p"] != null && jsonObj["g"] != null && jsonObj.Count == 2)
                         {
-                            // Message = "Keys: " + "p: " + jsonObj["p"] + ", g: " + jsonObj["g"];
+                            // Sprawdzic czy p oraz g sa poprawne (moga byc funkcje statyczne Diffie=Hellman.cs)
+                            BigInteger _p, _g;
+                            BigInteger.TryParse(jsonObj["p"].ToString(), out _p);
+                            BigInteger.TryParse(jsonObj["g"].ToString(), out _g);
+                            dh = new DiffieHellman(_p, _g);
+
+                            // We computed B, so we gonna send it to the server
+                            JObject toSend = new JObject(
+                                new JProperty("a", dh.A.ToString())
+                                );
+
+                            byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(toSend.ToString());
+
+                            networkStream.Write(bytesToSend, 0, bytesToSend.Length);
+
+
+                            Message = "g: " + dh.g + "\n" + "p: " + dh.p;
+                            Message += "To wysyłamy serwerowi: " + dh.A;
+
                             displayMessage();
                         }
                         else if (jsonObj["b"] != null && jsonObj.Count == 1)
                         {
-
+                            BigInteger _B;
+                            BigInteger.TryParse(jsonObj["b"].ToString(), out _B);
+                            dh.SetB(_B);
+                            Message = "\n\nUstalony tajny klucz: " + dh.Key;
+                            displayMessage();
                         }
                     }
                     else if (jsonObj["msg"] != null && jsonObj["from"] != null && jsonObj.Count == 2)
@@ -101,25 +124,6 @@ namespace Client
             else
             {
                 ChatTextBox.Text +=  Environment.NewLine + " >> " + Message + "\n";
-            }
-        }
-
-        public void KeyExchange(int step)
-        {
-            switch (step)
-            {
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    break;
-                default:
-                    break;
             }
         }
 

@@ -47,10 +47,15 @@ function StartServer() {
       isKeyExchanged: false,
       p: dh.generatePrime(),
       g: dh.generatePrimitiveRoot(),
-      a: dh.generateSecretNumber(),
-      A: dh.computeA(socket.g, socket.a, socket.p),
-      B: null
+      a: dh.generateSecretNumber(10000, 9999999),
+      A: null,
+      B: null,
+      Key: null
     };
+
+    client.B = dh.computeB(client.g, client.a, client.p);
+    //ob = {"b" : client.B};
+    //socket.write(JSON.stringify(ob));
 
     clients.push(client);
 
@@ -78,7 +83,15 @@ function StartServer() {
 
       // If there is a
       } else if(jsonData.hasOwnProperty("a") && Object.keys(jsonData).length === 1) {
+        //console.log("Odebraliśmy a. Jego wartość to: %s".red, jsonData["a"]);
 
+        client.A = jsonData["a"];
+        client.Key = dh.computeKey(client.A, client.a, client.p);
+
+        ob = {"b" : client.B};
+        socket.write(JSON.stringify(ob));
+
+        console.log("Ustalony, tajny klucz: %s".red, client.Key);
       // If there is encryption mode
       } else if(jsonData.hasOwnProperty("encryption") && Object.keys(jsonData).length === 1) {
 
@@ -93,7 +106,7 @@ function StartServer() {
 
 
       console.log("[%s]: %s".yellow, clientAddress, data);
-      console.log(client.name, client.encryption, client.a);
+      console.log("Name: " + client.name + ", Encryption: " + client.encryption + ", Secret number: " + client.a + ", Key: " + client.A);
       Broadcast(socket, data);
 
       //var jsonData = JSON.parse(data);
