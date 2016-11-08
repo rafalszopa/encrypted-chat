@@ -2,6 +2,7 @@ var net = require('net');
 var colors = require('colors');
 var dh = require('./diffie-hellman');
 var base64 = require('./base64');
+var CaesarShift = require('./caesarShift')
 
 var server = null;
 
@@ -109,19 +110,6 @@ function StartServer() {
       console.log("[%s]: %s".yellow, clientAddress, data);
       console.log("Name: " + client.name + ", Encryption: " + client.encryption + ", Secret number: " + client.a + ", Key: " + client.A);
       Broadcast(socket, data);
-
-      //var jsonData = JSON.parse(data);
-
-      //if(jsonData.hasOwnProperty("request")) {
-//        console.log(jsonData.request);
-  //    }
-
-      // var receivedJson = JSON.parse(data);
-      // console.log(receivedJson);
-      // if(receivedJson.hasOwnProperty("msg")) {
-      //   console.log("Obiekt ma klucz: " + receivedJson.msg);
-      // }
-
     });
 
     socket.on('error', function(err) {
@@ -132,10 +120,11 @@ function StartServer() {
       console.log("User %s disconnected.".red, clientAddress);
 
       // Remove client socket from an array
-      var i = clients.indexOf(socket);
-      if(i != -1) {
-        clients.splice(i, 1);
-      }
+      removeClientBySocket(socket);
+      // var i = clients.indexOf(socket);
+      // if(i != -1) {
+      //   clients.splice(i, 1);
+      // }
     });
 
   });
@@ -153,6 +142,13 @@ function findClientBySocket(socket) {
     }
   }
   return null;
+}
+
+function removeClientBySocket(socket) {
+  var i = clients.indexOf(socket);
+  if(i != -1) {
+    clients.splice(i, 1);
+  }
 }
 
 StartServer();
