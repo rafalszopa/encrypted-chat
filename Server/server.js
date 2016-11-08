@@ -91,6 +91,8 @@ function StartServer() {
         ob = {"b" : client.B};
         socket.write(JSON.stringify(ob));
 
+        client.isKeyExchanged = true;
+
         console.log("Ustalony, tajny klucz: %s".red, client.Key);
       // If there is encryption mode
       } else if(jsonData.hasOwnProperty("encryption") && Object.keys(jsonData).length === 1) {
@@ -103,7 +105,6 @@ function StartServer() {
         socket.destroy();
         return;
       }
-
 
       console.log("[%s]: %s".yellow, clientAddress, data);
       console.log("Name: " + client.name + ", Encryption: " + client.encryption + ", Secret number: " + client.a + ", Key: " + client.A);

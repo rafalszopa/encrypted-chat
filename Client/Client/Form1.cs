@@ -86,8 +86,6 @@ namespace Client
                     else
                     {
                         // Json object is incorrect!
-                        Message = "Do dupy na raki!";
-                        displayMessage();
                     }
                         
 
@@ -223,16 +221,6 @@ namespace Client
                 MessageTextBox.Text = "";
                 return;
             }
-
-            //Message toSend = new Message(Nick, MessageTextBox.Text);
-            //var jsonToSend = JsonConvert.SerializeObject(toSend);
-
-            //label5.Text += jsonToSend;
-
-            //byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(jsonToSend);
-
-            //if (Client.Connected)
-            //    networkStream.Write(bytesToSend, 0, bytesToSend.Length);
             else
             {
                 StatusLabel.ForeColor = Color.Red;
@@ -243,8 +231,8 @@ namespace Client
                 
 
             // When data was sent
-            ChatTextBox.Text += $"[Me]: {MessageTextBox.Text}\n";
-            MessageTextBox.Text = "";
+            //ChatTextBox.Text += $"[Me]: {MessageTextBox.Text}\n";
+            //MessageTextBox.Text = "";
         }
 
         // Main function
