@@ -2,10 +2,10 @@ var net = require('net');
 var colors = require('colors');
 var dh = require('./diffie-hellman');
 var base64 = require('./base64');
-var caesarShift = require('./caesarShift')
+var caesarShift = require('./caesarShift');
+var xor = require('./xor');
 
 var server = null;
-
 var PORT = 9000;
 clients = [];
 
@@ -88,7 +88,7 @@ function StartServer() {
         if(jsonData["encryption"] === "xor")
           client.encryption = "xor";
         else {
-          //Console.log("Encryption: %s was not recognized.".red, jsonData["encryption"]);
+          Console.log("Encryption: %s was not recognized.".red, jsonData["encryption"]);
         }
       }
       // Message
@@ -100,20 +100,17 @@ function StartServer() {
         console.log("Json: %s".red, jsonData["msg"]);
 
         var message = base64.Decode(jsonData["msg"]);
+        var clientName = jsonData["from"];
         var decoded = "";
 
         if(client.encryption === "cezar")
-        {
           decoded = caesarShift.Code(message, -client.Key);
-        }
         else if(client.encryption === "xor")
-        {
-          //xor
-        }
+          decoded = xor.Code(message, client.Key);
 
         console.log("Log from received(). Message: %s".cyan, decoded);
 
-        Broadcast(socket, decoded);
+        Broadcast(socket, decoded, clientName);
       }
       // Unrecognized keys are treat as a cheat
       else {
@@ -128,12 +125,12 @@ function StartServer() {
 //      console.log("Encryption: " + client.encryption + ", Secret number: " + client.a + ", Key: " + client.A);
     });
 
-    // socket.on('error', function(err) {
-    //   console.log("Error occured: %s".red, err.message);
-    //
-    //   // removeClientBySocket(socket);
-    //   // socket.destroy();
-    // });
+    socket.on('error', function(err) {
+      console.log("Error occured: %s".red, err.message);
+
+      removeClientBySocket(socket);
+      socket.end();
+    });
 
     socket.on('close', function() {
       console.log("User %s disconnected.".red, clientAddress);
@@ -152,7 +149,7 @@ function StartServer() {
   });
 }
 
-function Broadcast(sender, message) {
+function Broadcast(sender, message, senderName) {
 
 //  console.log("Log from broadcast(). Message: %s".cyan, message);
   var encoded;
@@ -173,7 +170,7 @@ function Broadcast(sender, message) {
 
         console.log("Msg: %s".red, encoded);
 
-        ob = {"msg": encoded, "from": "Rafal"};
+        ob = {"msg": encoded, "from": senderName};
 
         clients[i].soc.write(JSON.stringify(ob));
       }
