@@ -42,6 +42,10 @@
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.SendBtn = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
+            this.radioButtonNone = new System.Windows.Forms.RadioButton();
+            this.radioButtonCaesar = new System.Windows.Forms.RadioButton();
+            this.radioButtonXOR = new System.Windows.Forms.RadioButton();
+            this.label6 = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -90,7 +94,7 @@
             // MessageTextBox
             // 
             this.MessageTextBox.Enabled = false;
-            this.MessageTextBox.Location = new System.Drawing.Point(95, 277);
+            this.MessageTextBox.Location = new System.Drawing.Point(95, 316);
             this.MessageTextBox.Name = "MessageTextBox";
             this.MessageTextBox.Size = new System.Drawing.Size(366, 20);
             this.MessageTextBox.TabIndex = 5;
@@ -98,7 +102,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 280);
+            this.label3.Location = new System.Drawing.Point(12, 319);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 13);
             this.label3.TabIndex = 6;
@@ -122,9 +126,9 @@
             // 
             // ChatTextBox
             // 
-            this.ChatTextBox.Location = new System.Drawing.Point(15, 67);
+            this.ChatTextBox.Location = new System.Drawing.Point(15, 91);
             this.ChatTextBox.Name = "ChatTextBox";
-            this.ChatTextBox.Size = new System.Drawing.Size(560, 197);
+            this.ChatTextBox.Size = new System.Drawing.Size(560, 204);
             this.ChatTextBox.TabIndex = 10;
             this.ChatTextBox.Text = "";
             // 
@@ -148,7 +152,7 @@
             // SendBtn
             // 
             this.SendBtn.Enabled = false;
-            this.SendBtn.Location = new System.Drawing.Point(500, 275);
+            this.SendBtn.Location = new System.Drawing.Point(500, 314);
             this.SendBtn.Name = "SendBtn";
             this.SendBtn.Size = new System.Drawing.Size(75, 23);
             this.SendBtn.TabIndex = 12;
@@ -159,17 +163,63 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(15, 337);
+            this.label5.Location = new System.Drawing.Point(12, 373);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(35, 13);
             this.label5.TabIndex = 13;
             this.label5.Text = "label5";
+            // 
+            // radioButtonNone
+            // 
+            this.radioButtonNone.AutoSize = true;
+            this.radioButtonNone.Location = new System.Drawing.Point(115, 57);
+            this.radioButtonNone.Name = "radioButtonNone";
+            this.radioButtonNone.Size = new System.Drawing.Size(51, 17);
+            this.radioButtonNone.TabIndex = 14;
+            this.radioButtonNone.TabStop = true;
+            this.radioButtonNone.Text = "None";
+            this.radioButtonNone.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonCaesar
+            // 
+            this.radioButtonCaesar.AutoSize = true;
+            this.radioButtonCaesar.Location = new System.Drawing.Point(172, 57);
+            this.radioButtonCaesar.Name = "radioButtonCaesar";
+            this.radioButtonCaesar.Size = new System.Drawing.Size(82, 17);
+            this.radioButtonCaesar.TabIndex = 15;
+            this.radioButtonCaesar.TabStop = true;
+            this.radioButtonCaesar.Text = "Caesar Shift";
+            this.radioButtonCaesar.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonXOR
+            // 
+            this.radioButtonXOR.AutoSize = true;
+            this.radioButtonXOR.Location = new System.Drawing.Point(261, 57);
+            this.radioButtonXOR.Name = "radioButtonXOR";
+            this.radioButtonXOR.Size = new System.Drawing.Size(48, 17);
+            this.radioButtonXOR.TabIndex = 16;
+            this.radioButtonXOR.TabStop = true;
+            this.radioButtonXOR.Text = "XOR";
+            this.radioButtonXOR.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(12, 59);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(89, 13);
+            this.label6.TabIndex = 17;
+            this.label6.Text = "Select encryption";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(587, 486);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.radioButtonXOR);
+            this.Controls.Add(this.radioButtonCaesar);
+            this.Controls.Add(this.radioButtonNone);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.SendBtn);
             this.Controls.Add(this.statusStrip1);
@@ -186,7 +236,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Chat Client";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.Load += new System.EventHandler(this.SendBtn_Click);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -210,6 +260,10 @@
         private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
         private System.Windows.Forms.Button SendBtn;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.RadioButton radioButtonNone;
+        private System.Windows.Forms.RadioButton radioButtonCaesar;
+        private System.Windows.Forms.RadioButton radioButtonXOR;
+        private System.Windows.Forms.Label label6;
     }
 }
 

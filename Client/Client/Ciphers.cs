@@ -18,7 +18,7 @@ namespace Client
         }
     }
 
-    public class CesarShift
+    public class CaesarShift
     {
         public static char Cipher(char ch, int key)
         {

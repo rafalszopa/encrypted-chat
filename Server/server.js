@@ -2,7 +2,7 @@ var net = require('net');
 var colors = require('colors');
 var dh = require('./diffie-hellman');
 var base64 = require('./base64');
-var CaesarShift = require('./caesarShift')
+var caesarShift = require('./caesarShift')
 
 var server = null;
 
@@ -11,28 +11,12 @@ clients = [];
 
 console.log("Encrypted Chat Server v. 1.0".green);
 
-function Broadcast(sender, message) {
-  if(clients.length > 0) {
-    for(var i = 0; i < clients.length; i++) {
-      if(clients[i].soc !== sender && clients[i].isKeyExchanged == true) {
-        clients[i].soc.write(message);
-      }
-    }
-  }
-}
-
-function Test(socket) {
-  console.log(socket.remoteAddress);
-  console.log("KSKDKD");
-}
-
 function StartServer() {
 
   try {
     server = net.createServer();
   } catch(err) {
-    console.log("Error occured: ".red, err.message);
-    return;
+//    return;
   }
 
   server.on('connection', function(socket) {
@@ -40,11 +24,9 @@ function StartServer() {
     var clientAddress = socket.remoteAddress + ":" + socket.remotePort;
     console.log("New user connected: %s".green, clientAddress);
 
-
     var client = {
-      name: "Mariusz",
       soc: socket,
-      encryption: "none",
+      encryption: "cezar",
       isKeyExchanged: false,
       p: dh.generatePrime(),
       g: dh.generatePrimitiveRoot(),
@@ -55,36 +37,35 @@ function StartServer() {
     };
 
     client.B = dh.computeB(client.g, client.a, client.p);
-    //ob = {"b" : client.B};
-    //socket.write(JSON.stringify(ob));
-
     clients.push(client);
+    console.log("Liczba klientow: %s".blue, clients.length);
 
     socket.on('data', function(data) {
 
       var client = findClientBySocket(socket);
+
       // If received data are not in JSON format
       // Log the error and destroy socket
       try {
         var jsonData = JSON.parse(data);
       }
       catch(e) {
-        console.log("Unrecognized data format. Error: %s".red, e.message);
+      //  console.log("Unrecognized data format. Error: %s".red, e.message);
         socket.destroy();
         return;
       }
 
       // If there is a request
-      if(jsonData.hasOwnProperty("request") && Object.keys(jsonData).length == 1) {
+      if(jsonData.hasOwnProperty("request") && Object.keys(jsonData).length == 1)
+      {
         if(jsonData["request"] === "keys") {
 
           ob = {"p" : client.p, "g": client.g};
           socket.write(JSON.stringify(ob));
         }
 
-      // If there is a
-      } else if(jsonData.hasOwnProperty("a") && Object.keys(jsonData).length === 1) {
-        //console.log("Odebraliśmy a. Jego wartość to: %s".red, jsonData["a"]);
+      }
+      else if(jsonData.hasOwnProperty("a") && Object.keys(jsonData).length === 1) {
 
         client.A = jsonData["a"];
         client.Key = dh.computeKey(client.A, client.a, client.p);
@@ -94,37 +75,74 @@ function StartServer() {
 
         client.isKeyExchanged = true;
 
-        console.log("Ustalony, tajny klucz: %s".red, client.Key);
-      // If there is encryption mode
-      } else if(jsonData.hasOwnProperty("encryption") && Object.keys(jsonData).length === 1) {
+      //  console.log("Ustalony, tajny klucz: %s".red, client.Key);
 
-      } else if(jsonData.hasOwnProperty("msg") && jsonData.hasOwnProperty("from") && Object.keys(jsonData).length === 2) {
+      }
+      // Encryption mode
+      else if(jsonData.hasOwnProperty("encryption") && Object.keys(jsonData).length === 1) {
 
+        if(jsonData["encryption"] === "none")
+          client.encryption = "none";
+        if(jsonData["encryption"] === "cezar")
+          client.encryption = "cezar";
+        if(jsonData["encryption"] === "xor")
+          client.encryption = "xor";
+        else {
+          //Console.log("Encryption: %s was not recognized.".red, jsonData["encryption"]);
+        }
+      }
+      // Message
+      else if(jsonData.hasOwnProperty("msg") && jsonData.hasOwnProperty("from") && Object.keys(jsonData).length === 2) {
+
+        if(!client.isKeyExchanged)
+          return;
+
+        console.log("Json: %s".red, jsonData["msg"]);
+
+        var message = base64.Decode(jsonData["msg"]);
+        var decoded = "";
+
+        if(client.encryption === "cezar")
+        {
+          decoded = caesarShift.Code(message, -client.Key);
+        }
+        else if(client.encryption === "xor")
+        {
+          //xor
+        }
+
+        console.log("Log from received(). Message: %s".cyan, decoded);
+
+        Broadcast(socket, decoded);
+      }
       // Unrecognized keys are treat as a cheat
-      } else {
-        console.log("Unrecognized data format: %s".red, JSON.stringify(jsonData));
-        socket.destroy();
+      else {
+  //      console.log("Unrecognized data format: %s".red, JSON.stringify(jsonData));
+        socket.end();
+        removeClientBySocket(socket);
+        console.log("Liczba klientow: %s".blue, clients.length);
         return;
       }
 
-      console.log("[%s]: %s".yellow, clientAddress, data);
-      console.log("Name: " + client.name + ", Encryption: " + client.encryption + ", Secret number: " + client.a + ", Key: " + client.A);
-      Broadcast(socket, data);
+//      console.log("[%s]: %s".yellow, clientAddress, data);
+//      console.log("Encryption: " + client.encryption + ", Secret number: " + client.a + ", Key: " + client.A);
     });
 
-    socket.on('error', function(err) {
-      console.log("Error occured: %s".red, err.message);
-    });
+    // socket.on('error', function(err) {
+    //   console.log("Error occured: %s".red, err.message);
+    //
+    //   // removeClientBySocket(socket);
+    //   // socket.destroy();
+    // });
 
     socket.on('close', function() {
       console.log("User %s disconnected.".red, clientAddress);
 
       // Remove client socket from an array
+
       removeClientBySocket(socket);
-      // var i = clients.indexOf(socket);
-      // if(i != -1) {
-      //   clients.splice(i, 1);
-      // }
+      socket.end();
+      console.log("Liczba klientow: %s".blue, clients.length);
     });
 
   });
@@ -132,7 +150,35 @@ function StartServer() {
   server.listen(PORT, function() {
     console.log("Server is listening on port %s".green, PORT);
   });
+}
 
+function Broadcast(sender, message) {
+
+//  console.log("Log from broadcast(). Message: %s".cyan, message);
+  var encoded;
+  // var toSend;
+
+  if(clients.length > 0) {
+    for(var i = 0; i < clients.length; i++) {
+      if(clients[i].soc !== sender && clients[i].isKeyExchanged === true) {
+
+        if(clients[i].encryption === "cezar")
+          encoded = base64.Encode(caesarShift.Code(message, clients[i].Key));
+        if(clients[i].encryption === "xor")
+          { /*XOR Encode*/ }
+        if(clients[i].encryption === "none")
+          encoded = base64.Encode(message);
+
+        //toSend = base64.Encode(decoded);
+
+        console.log("Msg: %s".red, encoded);
+
+        ob = {"msg": encoded, "from": "Rafal"};
+
+        clients[i].soc.write(JSON.stringify(ob));
+      }
+    }
+  }
 }
 
 function findClientBySocket(socket) {
@@ -145,10 +191,25 @@ function findClientBySocket(socket) {
 }
 
 function removeClientBySocket(socket) {
-  var i = clients.indexOf(socket);
-  if(i != -1) {
-    clients.splice(i, 1);
+  //var i = clients.indexOf(socket);
+
+  for(var i = 0; i < clients.length; i++) {
+    if(clients[i].soc === socket) {
+      var j = i;
+      break;
+    }
+  }
+
+  if(j != -1) {
+    clients.splice(j, 1);
   }
 }
+
+// function removeClientBySocket(socket) {
+//   var i = clients.indexOf(socket);
+//   if(i != -1) {
+//     clients.splice(i, 1);
+//   }
+// }
 
 StartServer();

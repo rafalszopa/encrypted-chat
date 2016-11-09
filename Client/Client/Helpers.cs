@@ -19,11 +19,10 @@ namespace Client
         }
     }
 
-    public enum ApplicationStage
+    public enum Encryption
     {
-        Request,
-        KeyExchange,
-        Running,
-        Disconnected
+        none,
+        cezar,
+        xor
     }
 }

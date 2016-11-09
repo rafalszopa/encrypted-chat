@@ -30,6 +30,9 @@ namespace Client
         string Message = null;
         bool isKeyExchanged = false;
         DiffieHellman dh = null;
+        Encryption encryption = Encryption.cezar;
+
+        string DebugMsg = "";
 
         public void GetMessage()
         {
@@ -41,11 +44,11 @@ namespace Client
                     byte[] inStream = new byte[buffSize];
 
                     networkStream.Read(inStream, 0, buffSize);
-                    Message = Encoding.ASCII.GetString(inStream);
+                    string received = Encoding.ASCII.GetString(inStream);
 
-                    JObject jsonObj = JObject.Parse(Message);
+                    JObject jsonObj = JObject.Parse(received);
 
-                    if(!isKeyExchanged)
+                    if (!isKeyExchanged)
                     {
                         if (jsonObj["p"] != null && jsonObj["g"] != null && jsonObj.Count == 2)
                         {
@@ -64,11 +67,10 @@ namespace Client
 
                             networkStream.Write(bytesToSend, 0, bytesToSend.Length);
 
-
                             Message = "g: " + dh.g + "\n" + "p: " + dh.p;
                             Message += "To wysyłamy serwerowi: " + dh.A;
 
-                            displayMessage();
+                            //displayMessage();
                         }
                         else if (jsonObj["b"] != null && jsonObj.Count == 1)
                         {
@@ -76,39 +78,46 @@ namespace Client
                             BigInteger.TryParse(jsonObj["b"].ToString(), out _B);
                             dh.SetB(_B);
                             Message = "\n\nUstalony tajny klucz: " + dh.Key;
+                            isKeyExchanged = true;
                             displayMessage();
                         }
                     }
                     else if (jsonObj["msg"] != null && jsonObj["from"] != null && jsonObj.Count == 2)
                     {
-                        //
+                        //Message = "\n[" + jsonObj["from"] + "]: " + jsonObj["msg"];
+
+                        
+
+                        //if(encryption == Encryption.cezar)
+                        //Message += "\n odebralem wiadomosc";
+                        var _1 = jsonObj["msg"].ToString();
+                        var _2 = Base64.Decode(_1);
+                        var _3 = CaesarShift.Decode(_2, (int)dh.Key);
+
+                        DebugMsg = "\n1: " + _1;
+                        DebugMsg += "\n2: " + _2;
+                        DebugMsg += "\n3: " + _3;
+                        //Message = "\n" + jsonObj["msg"];
+                        //Message += "\n" + CaesarShift.Decode(Base64.Decode(jsonObj["msg"].ToString()), (int)dh.Key);
+                        Message = _3;
+
+                        UpdateLabel();
+
+
+                        //Message += "[" + jsonObj["from"] + "]: " + CaesarShift.Decode(Base64.Decode(jsonObj["msg"].ToString()), (int)dh.Key);
+
+                        displayMessage();
                     }
                     else
                     {
                         // Json object is incorrect!
                     }
-                        
-
-                        // 1. Sprawdz klucze
-                        // 2. Wygeneruj A
-                        // 3. Wyslij A do serwera
-                        // 4. Zmien stage na 
-
-                        // We have received message
-                        // 1. Check if json
-                        // 2. Check if we are authorized
-                        //      - if so, we expect message
-                        //      - otherwise, keys etc.
-
-                        //DiffieHellman DH = new DiffieHellman(23, 5);
-
-                    //Message = "p:" + DH.p + ", g: " + DH.g + ", b: " + DH.b + ", B: " + DH.B;
-
-                    //displayMessage();
 
                 } catch (Exception Ex)
                 {
                     // Log exception
+                    Message = "!!! " + Ex.Message;
+                    displayMessage();
                 }
             }
         }
@@ -122,6 +131,18 @@ namespace Client
             else
             {
                 ChatTextBox.Text +=  Environment.NewLine + " >> " + Message + "\n";
+            }
+        }
+
+        public void UpdateLabel()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new MethodInvoker(UpdateLabel));
+            }
+            else
+            {
+                label5.Text = Environment.NewLine + " >> " + DebugMsg + "\n";
             }
         }
 
@@ -152,8 +173,6 @@ namespace Client
                 ctThread = new System.Threading.Thread(GetMessage);
                 ctThread.Start();
 
-
-
                 //Does not work
                 StatusLabel.ForeColor = Color.Green;
                 StatusLabel.Text = "Connection opened successfully";
@@ -164,7 +183,8 @@ namespace Client
                 StatusLabel.ForeColor = Color.Red;
                 //Does not work
                 StatusLabel.Text = $"Can not connect to the server. Error: {ex.Message}";
-                MessageTextBox.Text = "Something went wrong";
+                Message = "!!! " + ex.Message;
+                displayMessage();
                 return;
             }
 
@@ -189,7 +209,8 @@ namespace Client
             }
             catch(Exception ex)
             {
-
+                Message = "!!! " + ex.Message;
+                displayMessage();
             }
 
             StatusLabel.ForeColor = Color.Green;
@@ -221,18 +242,37 @@ namespace Client
                 MessageTextBox.Text = "";
                 return;
             }
-            else
-            {
-                StatusLabel.ForeColor = Color.Red;
-                StatusLabel.Text = "Connection has lost";
-                Disconnect();
-                return;
-            }
-                
+            //else
+            //{
+            //    StatusLabel.ForeColor = Color.Red;
+            //    StatusLabel.Text = "Connection has lost";
+            //    Disconnect();
+            //    return;
+            //}
+
+            string messageFromTextbox = MessageTextBox.Text;
+            string messageToSend = "";
+
+            if (encryption == Encryption.cezar)
+                messageToSend = CaesarShift.Encode(messageFromTextbox, (int)dh.Key);
+            else if(encryption == Encryption.xor) { }
+                // xor
+
+            JObject toSend = new JObject(
+                    new JProperty("msg", Base64.Encode(messageToSend)),
+                    new JProperty("from", "John")
+                    );
+
+            byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(toSend.ToString());
+
+            label5.Text = toSend.ToString();
+            label5.Text += "\n" + dh.Key.ToString();
+
+            networkStream.Write(bytesToSend, 0, bytesToSend.Length);
 
             // When data was sent
-            //ChatTextBox.Text += $"[Me]: {MessageTextBox.Text}\n";
-            //MessageTextBox.Text = "";
+            ChatTextBox.Text += $"[Me]: {MessageTextBox.Text}\n";
+            MessageTextBox.Text = "";
         }
 
         // Main function
@@ -265,11 +305,6 @@ namespace Client
                     StatusLabel.Text = "Some error has occured";
                     break;
             }
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Disconnect();
         }
     }
 }
