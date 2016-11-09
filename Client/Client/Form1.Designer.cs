@@ -41,7 +41,6 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.SendBtn = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
             this.radioButtonNone = new System.Windows.Forms.RadioButton();
             this.radioButtonCaesar = new System.Windows.Forms.RadioButton();
             this.radioButtonXOR = new System.Windows.Forms.RadioButton();
@@ -137,7 +136,7 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StatusLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 464);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 362);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(587, 22);
             this.statusStrip1.TabIndex = 11;
@@ -160,15 +159,6 @@
             this.SendBtn.Text = "Send";
             this.SendBtn.UseVisualStyleBackColor = true;
             this.SendBtn.Click += new System.EventHandler(this.SendBtn_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 373);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(35, 13);
-            this.label5.TabIndex = 13;
-            this.label5.Text = "label5";
             // 
             // radioButtonNone
             // 
@@ -213,6 +203,7 @@
             // 
             // buttonApply
             // 
+            this.buttonApply.Enabled = false;
             this.buttonApply.Location = new System.Drawing.Point(500, 54);
             this.buttonApply.Name = "buttonApply";
             this.buttonApply.Size = new System.Drawing.Size(75, 23);
@@ -220,19 +211,17 @@
             this.buttonApply.Text = "Apply";
             this.buttonApply.UseVisualStyleBackColor = true;
             this.buttonApply.Click += new System.EventHandler(this.buttonApply_Click);
-            this.buttonApply.Enabled = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(587, 486);
+            this.ClientSize = new System.Drawing.Size(587, 384);
             this.Controls.Add(this.buttonApply);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.radioButtonXOR);
             this.Controls.Add(this.radioButtonCaesar);
             this.Controls.Add(this.radioButtonNone);
-            this.Controls.Add(this.label5);
             this.Controls.Add(this.SendBtn);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.ChatTextBox);
@@ -271,7 +260,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
         private System.Windows.Forms.Button SendBtn;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.RadioButton radioButtonNone;
         private System.Windows.Forms.RadioButton radioButtonCaesar;
         private System.Windows.Forms.RadioButton radioButtonXOR;

@@ -128,7 +128,7 @@ namespace Client
             }
             else
             {
-                label5.Text = Environment.NewLine + " >> " + DebugMsg + "\n";
+                //label5.Text = Environment.NewLine + " >> " + DebugMsg + "\n";
             }
         }
 
@@ -147,7 +147,7 @@ namespace Client
                 JObject request = new JObject(
                     new JProperty("request", "keys"));
 
-                label5.Text += request.ToString();
+                //label5.Text += request.ToString();
 
                 byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(request.ToString());
 
@@ -307,9 +307,10 @@ namespace Client
                 encryptionMode = "xor";
                 encryption = Encryption.xor;
             }
-
             else
+            {
                 return;
+            }
 
             JObject toSend = new JObject(new JProperty("encryption", encryptionMode));
             byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(toSend.ToString());
