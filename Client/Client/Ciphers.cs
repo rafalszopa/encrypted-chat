@@ -3,18 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace Client
 {
     public class XOR
     {
-        public static void Enode()
+        public static string Code(string input, int key)
         {
+            byte pad;
+            byte[] buffor = Encoding.ASCII.GetBytes(input);
+            byte[] tmp = new byte[input.Length];
 
-        }
-        public static void Decode()
-        {
+            if (BitConverter.IsLittleEndian)
+                pad = (byte)key.ToString()[0];
+            else
+                pad = (byte)key.ToString()[key.ToString().Length - 1];
 
+            for (int i = 0; i < input.Length; i++)
+                tmp[i] = (byte)(buffor[i] ^ pad);
+
+            return Encoding.ASCII.GetString(tmp);
         }
     }
 

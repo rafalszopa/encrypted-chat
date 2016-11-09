@@ -30,7 +30,7 @@ namespace Client
         string Message = null;
         bool isKeyExchanged = false;
         DiffieHellman dh = null;
-        Encryption encryption = Encryption.cezar;
+        Encryption encryption = Encryption.none;
 
         string DebugMsg = "";
 
@@ -60,8 +60,7 @@ namespace Client
 
                             // We computed B, so we gonna send it to the server
                             JObject toSend = new JObject(
-                                new JProperty("a", dh.A.ToString())
-                                );
+                                new JProperty("a", dh.A.ToString()));
 
                             byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(toSend.ToString());
 
@@ -84,27 +83,14 @@ namespace Client
                     }
                     else if (jsonObj["msg"] != null && jsonObj["from"] != null && jsonObj.Count == 2)
                     {
-                        //Message = "\n[" + jsonObj["from"] + "]: " + jsonObj["msg"];
+                        if(encryption == Encryption.cezar)
+                            Message = "[" + jsonObj["from"].ToString() + "]: " + CaesarShift.Decode(Base64.Decode(jsonObj["msg"].ToString()), (int)dh.Key);
 
+                        else if(encryption == Encryption.xor)
+                            Message = "[" + jsonObj["from"].ToString() + "]: " + XOR.Code(Base64.Decode(jsonObj["msg"].ToString()), (int)dh.Key);
                         
-
-                        //if(encryption == Encryption.cezar)
-                        //Message += "\n odebralem wiadomosc";
-                        var _1 = jsonObj["msg"].ToString();
-                        var _2 = Base64.Decode(_1);
-                        var _3 = CaesarShift.Decode(_2, (int)dh.Key);
-
-                        DebugMsg = "\n1: " + _1;
-                        DebugMsg += "\n2: " + _2;
-                        DebugMsg += "\n3: " + _3;
-                        //Message = "\n" + jsonObj["msg"];
-                        //Message += "\n" + CaesarShift.Decode(Base64.Decode(jsonObj["msg"].ToString()), (int)dh.Key);
-                        Message = _3;
-
-                        UpdateLabel();
-
-
-                        //Message += "[" + jsonObj["from"] + "]: " + CaesarShift.Decode(Base64.Decode(jsonObj["msg"].ToString()), (int)dh.Key);
+                        else if(encryption == Encryption.none)
+                            Message = "[" + jsonObj["from"].ToString() + "]: " + Base64.Decode(jsonObj["msg"].ToString());
 
                         displayMessage();
                     }
@@ -130,7 +116,7 @@ namespace Client
             }
             else
             {
-                ChatTextBox.Text +=  Environment.NewLine + " >> " + Message + "\n";
+                ChatTextBox.Text +=  Environment.NewLine + Message + "\n";
             }
         }
 
@@ -158,11 +144,8 @@ namespace Client
                 Client.Connect(Host, Port);
                 networkStream = Client.GetStream();
 
-                // Send request to the server
-                //JObject request = new JObject(@"{'request':'keys'}");
                 JObject request = new JObject(
-                    new JProperty("request", "keys")
-                    );
+                    new JProperty("request", "keys"));
 
                 label5.Text += request.ToString();
 
@@ -194,6 +177,7 @@ namespace Client
             PortTextBox.Enabled = false;
             SendBtn.Enabled = true;
             MessageTextBox.Enabled = true;
+            buttonApply.Enabled = true;
         }
 
         public void Disconnect()
@@ -242,31 +226,27 @@ namespace Client
                 MessageTextBox.Text = "";
                 return;
             }
-            //else
-            //{
-            //    StatusLabel.ForeColor = Color.Red;
-            //    StatusLabel.Text = "Connection has lost";
-            //    Disconnect();
-            //    return;
-            //}
 
             string messageFromTextbox = MessageTextBox.Text;
             string messageToSend = "";
 
             if (encryption == Encryption.cezar)
                 messageToSend = CaesarShift.Encode(messageFromTextbox, (int)dh.Key);
-            else if(encryption == Encryption.xor) { }
-                // xor
+
+            else if (encryption == Encryption.xor)
+                messageToSend = XOR.Code(messageFromTextbox, (int)dh.Key);
+
+            else if (encryption == Encryption.none)
+                messageToSend = messageFromTextbox;
 
             JObject toSend = new JObject(
                     new JProperty("msg", Base64.Encode(messageToSend)),
-                    new JProperty("from", "John")
-                    );
+                    new JProperty("from", Nick));
 
             byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(toSend.ToString());
 
-            label5.Text = toSend.ToString();
-            label5.Text += "\n" + dh.Key.ToString();
+            //label5.Text = toSend.ToString();
+            //label5.Text += "\n" + dh.Key.ToString();
 
             networkStream.Write(bytesToSend, 0, bytesToSend.Length);
 
@@ -305,6 +285,35 @@ namespace Client
                     StatusLabel.Text = "Some error has occured";
                     break;
             }
+        }
+
+        private void buttonApply_Click(object sender, EventArgs e)
+        {
+            string encryptionMode = "";
+
+            if (radioButtonNone.Checked && encryption != Encryption.none)
+            {
+                encryptionMode = "none";
+                encryption = Encryption.none;
+            }
+
+            else if (radioButtonCaesar.Checked && encryption != Encryption.cezar)
+            {
+                encryptionMode = "cezar";
+                encryption = Encryption.cezar;
+            }
+            else if (radioButtonXOR.Checked && encryption != Encryption.xor)
+            {
+                encryptionMode = "xor";
+                encryption = Encryption.xor;
+            }
+
+            else
+                return;
+
+            JObject toSend = new JObject(new JProperty("encryption", encryptionMode));
+            byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(toSend.ToString());
+            networkStream.Write(bytesToSend, 0, bytesToSend.Length);
         }
     }
 }

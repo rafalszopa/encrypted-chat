@@ -46,6 +46,7 @@
             this.radioButtonCaesar = new System.Windows.Forms.RadioButton();
             this.radioButtonXOR = new System.Windows.Forms.RadioButton();
             this.label6 = new System.Windows.Forms.Label();
+            this.buttonApply = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -172,6 +173,7 @@
             // radioButtonNone
             // 
             this.radioButtonNone.AutoSize = true;
+            this.radioButtonNone.Checked = true;
             this.radioButtonNone.Location = new System.Drawing.Point(115, 57);
             this.radioButtonNone.Name = "radioButtonNone";
             this.radioButtonNone.Size = new System.Drawing.Size(51, 17);
@@ -187,7 +189,6 @@
             this.radioButtonCaesar.Name = "radioButtonCaesar";
             this.radioButtonCaesar.Size = new System.Drawing.Size(82, 17);
             this.radioButtonCaesar.TabIndex = 15;
-            this.radioButtonCaesar.TabStop = true;
             this.radioButtonCaesar.Text = "Caesar Shift";
             this.radioButtonCaesar.UseVisualStyleBackColor = true;
             // 
@@ -198,7 +199,6 @@
             this.radioButtonXOR.Name = "radioButtonXOR";
             this.radioButtonXOR.Size = new System.Drawing.Size(48, 17);
             this.radioButtonXOR.TabIndex = 16;
-            this.radioButtonXOR.TabStop = true;
             this.radioButtonXOR.Text = "XOR";
             this.radioButtonXOR.UseVisualStyleBackColor = true;
             // 
@@ -211,11 +211,23 @@
             this.label6.TabIndex = 17;
             this.label6.Text = "Select encryption";
             // 
+            // buttonApply
+            // 
+            this.buttonApply.Location = new System.Drawing.Point(500, 54);
+            this.buttonApply.Name = "buttonApply";
+            this.buttonApply.Size = new System.Drawing.Size(75, 23);
+            this.buttonApply.TabIndex = 18;
+            this.buttonApply.Text = "Apply";
+            this.buttonApply.UseVisualStyleBackColor = true;
+            this.buttonApply.Click += new System.EventHandler(this.buttonApply_Click);
+            this.buttonApply.Enabled = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(587, 486);
+            this.Controls.Add(this.buttonApply);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.radioButtonXOR);
             this.Controls.Add(this.radioButtonCaesar);
@@ -264,6 +276,7 @@
         private System.Windows.Forms.RadioButton radioButtonCaesar;
         private System.Windows.Forms.RadioButton radioButtonXOR;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button buttonApply;
     }
 }
 

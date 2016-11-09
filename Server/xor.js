@@ -5,12 +5,11 @@ Xor.prototype.Code = function(input, key) {
   var buffer = new Buffer(input, 'ascii');
 
   console.log("Raw input: %s", input);
-  console.log("Char input:");
 
   // for(var i = 0; i < input.length; i++)
   //   console.log(buffer[i] + ", ");
 
-  if(isLittleEndian)
+  if(this.isLittleEndian())
     var pad = key.toString()[0];
   else
     var pad = key.toString()[a.toString().length - 1];
@@ -21,7 +20,6 @@ Xor.prototype.Code = function(input, key) {
     buffer[i] = (buffer[i] ^ pad[0]);
 
   return buffer.toString('ascii');
-
 }
 
 Xor.prototype.isLittleEndian = function() {

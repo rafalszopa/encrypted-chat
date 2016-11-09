@@ -26,7 +26,7 @@ function StartServer() {
 
     var client = {
       soc: socket,
-      encryption: "cezar",
+      encryption: "none",
       isKeyExchanged: false,
       p: dh.generatePrime(),
       g: dh.generatePrimitiveRoot(),
@@ -63,7 +63,6 @@ function StartServer() {
           ob = {"p" : client.p, "g": client.g};
           socket.write(JSON.stringify(ob));
         }
-
       }
       else if(jsonData.hasOwnProperty("a") && Object.keys(jsonData).length === 1) {
 
@@ -76,20 +75,23 @@ function StartServer() {
         client.isKeyExchanged = true;
 
       //  console.log("Ustalony, tajny klucz: %s".red, client.Key);
-
       }
       // Encryption mode
       else if(jsonData.hasOwnProperty("encryption") && Object.keys(jsonData).length === 1) {
 
         if(jsonData["encryption"] === "none")
           client.encryption = "none";
+
         if(jsonData["encryption"] === "cezar")
           client.encryption = "cezar";
+
         if(jsonData["encryption"] === "xor")
           client.encryption = "xor";
-        else {
-          Console.log("Encryption: %s was not recognized.".red, jsonData["encryption"]);
-        }
+
+        else
+          console.log("Encryption: %s was not recognized.".red, jsonData["encryption"]);
+
+          console.log("Encryption mode was changed on %s".yellow, client.encryption);
       }
       // Message
       else if(jsonData.hasOwnProperty("msg") && jsonData.hasOwnProperty("from") && Object.keys(jsonData).length === 2) {
@@ -107,6 +109,8 @@ function StartServer() {
           decoded = caesarShift.Code(message, -client.Key);
         else if(client.encryption === "xor")
           decoded = xor.Code(message, client.Key);
+        else if(client.encryption === "none")
+          decoded = message;
 
         console.log("Log from received(). Message: %s".cyan, decoded);
 
@@ -162,7 +166,7 @@ function Broadcast(sender, message, senderName) {
         if(clients[i].encryption === "cezar")
           encoded = base64.Encode(caesarShift.Code(message, clients[i].Key));
         if(clients[i].encryption === "xor")
-          { /*XOR Encode*/ }
+          encoded = base64.Encode(xor.Code(message, clients[i].Key));
         if(clients[i].encryption === "none")
           encoded = base64.Encode(message);
 
